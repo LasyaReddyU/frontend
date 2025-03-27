@@ -1,73 +1,14 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import SQLInjectionDetector from './SQLInjectionDetector';
 
-const SQLInjectionDetector = () => {
-  const [input, setInput] = useState('');
-  const [output, setOutput] = useState('');
-  const [loading, setLoading] = useState(false);
+// Model Selection Page Component
+const ModelSelectionPage = () => {
+  const navigate = useNavigate();
 
-  const handleInputChange = (e) => {
-    setInput(e.target.value);
-  };
-
-  const handleDisplayOutput = async () => {
-    if (!input) {
-      alert('Please enter input first');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Create a text file from input
-      const blob = new Blob([input], { type: 'text/plain' });
-      const file = new File([blob], 'input.txt', { type: 'text/plain' });
-      
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const response = await axios.post('http://localhost:5000/predict', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-
-      const predictionText = response.data.prediction === 1 
-        ? "Potential SQL Injection Detected!" 
-        : "No SQL Injection Detected";
-      
-      setOutput(predictionText);
-      setLoading(false);
-    } catch (error) {
-      setOutput('Error in analysis');
-      setLoading(false);
-      console.error('Prediction error:', error);
-    }
-  };
-
-  const handleStoreOutput = () => {
-    if (!output) {
-      alert('No output to store');
-      return;
-    }
-
-    // Automatically generate file with fixed title
-    const blob = new Blob([
-      `Department of Information Technology\n`,
-      `National Institute of Technology Karnataka, Surathkal-575025\n\n`,
-      `Information Assurance and Security (IT352) Course Project\n\n`,
-      `Title: SQL Injection Detection\n\n`,
-      `Carried out by:\n`,
-      `Uggumudi Sai Lasya Reddy (221IT074)\n`,
-      `Tanvi Poddar (221IT071)\n\n`,
-      `During Academic Session January - April 2025\n\n`,
-      `Input: ${input}\n\n`,
-      `Output: ${output}`
-    ], { type: 'text/plain' });
-    
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'project_output.txt';
-    link.click();
+  const handleModelSelect = (modelType) => {
+    // Navigate to the SQL Injection Detector and pass the model type
+    navigate('/detector', { state: { modelType } });
   };
 
   return (
@@ -76,7 +17,8 @@ const SQLInjectionDetector = () => {
       justifyContent: 'center', 
       alignItems: 'center', 
       height: '100vh',
-      backgroundColor: '#f0f2f5'
+      backgroundColor: '#f0f2f5',
+      fontFamily: 'Arial, sans-serif'
     }}>
       <div style={{ 
         width: '600px', 
@@ -88,53 +30,37 @@ const SQLInjectionDetector = () => {
         textAlign: 'center'
       }}>
         <div style={{ marginBottom: '20px' }}>
-          <h3 style={{ margin: 0, color: '#1a5f7a' }}>
+          <h3 style={{ margin: 0, color: '#1a5f7a', fontSize: '16px' }}>
             DEPARTMENT OF INFORMATION TECHNOLOGY
           </h3>
-          <p style={{ margin: '5px 0', fontSize: '0.9em' }}>
+          <p style={{ margin: '5px 0', fontSize: '14px', color: '#333' }}>
             NATIONAL INSTITUTE OF TECHNOLOGY KARNATAKA, SURATHKAL-575025
           </p>
-          <p style={{ margin: '10px 0', fontSize: '0.8em', color: '#666' }}>
+          <p style={{ margin: '10px 0', fontSize: '13px', color: '#666' }}>
             Information Assurance and Security (IT352) Course Project
           </p>
         </div>
 
         <div style={{ margin: '20px 0' }}>
-          <p style={{ margin: 0, fontStyle: 'italic', color: '#333' }}>
+          <p style={{ margin: 0, fontStyle: 'italic', color: '#333', fontSize: '15px' }}>
             Title: SQL Injection Detection
           </p>
         </div>
 
         <div style={{ margin: '20px 0' }}>
-          <p style={{ margin: 0, color: '#666' }}>Carried out by</p>
-          <p style={{ margin: '5px 0', color: '#666' }}>
+          <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>Carried out by</p>
+          <p style={{ margin: '5px 0', color: '#666', fontSize: '14px' }}>
             Uggumudi Sai Lasya Reddy (221IT074)
           </p>
-          <p style={{ margin: 0, color: '#666' }}>
+          <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>
             Tanvi Poddar (221IT071)
           </p>
         </div>
 
         <div style={{ margin: '20px 0' }}>
-          <p style={{ margin: 0, color: '#666' }}>
+          <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>
             During Academic Session January - April 2025
           </p>
-        </div>
-
-        <div style={{ margin: '20px 0' }}>
-          <textarea 
-            value={input}
-            onChange={handleInputChange}
-            placeholder="Enter your input here"
-            style={{
-              width: '100%',
-              height: '100px',
-              marginBottom: '10px',
-              padding: '10px',
-              border: '1px solid #d9d9d9',
-              borderRadius: '4px'
-            }}
-          />
         </div>
 
         <div style={{ 
@@ -144,49 +70,50 @@ const SQLInjectionDetector = () => {
           padding: '0 50px' 
         }}>
           <button 
-            onClick={handleDisplayOutput}
+            onClick={() => handleModelSelect('1d')}
             style={{
               padding: '10px',
-              backgroundColor: '#2980b9',
+              backgroundColor: '#6ca6cd',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer',
-              opacity: input ? 1 : 0.5
+              fontSize: '14px'
             }}
-            disabled={!input}
           >
-            {loading ? 'Analyzing...' : 'Detect SQL Injection'}
+            1D CNN
           </button>
 
           <button 
-            onClick={handleStoreOutput}
+            onClick={() => handleModelSelect('2d')}
             style={{
               padding: '10px',
-              backgroundColor: '#2980b9',
+              backgroundColor: '#6ca6cd',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer',
-              opacity: output ? 1 : 0.5
+              fontSize: '14px'
             }}
-            disabled={!output}
           >
-            Store Output as File
+            2D CNN
           </button>
         </div>
-
-        {output && !loading && (
-          <div style={{ 
-            marginTop: '10px', 
-            color: output.includes('Potential') ? 'red' : 'green' 
-          }}>
-            {output}
-          </div>
-        )}
       </div>
     </div>
   );
 };
 
-export default SQLInjectionDetector;
+// Main App Component
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<ModelSelectionPage />} />
+        <Route path="/detector" element={<SQLInjectionDetector />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
